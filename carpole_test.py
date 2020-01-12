@@ -1,13 +1,12 @@
 import gym
 import numpy as np
-import matplotlib.pyplot as plt
 
 ENV = 'CartPole-v0'
 NUM_DIZITIZER = 6
 GAMMA = 0.99    # 時間割引率
 ETA = 0.5   # 学習係数
 MAX_STEPS = 200
-NUM_EPISODES = 1000
+NUM_EPISODES = 500
 
 class Agent:
     def __init__(self, num_states, num_actions):
@@ -19,7 +18,6 @@ class Agent:
     def get_action(self, observation, episode):
         action = self.brain.decide_action(observation, episode)
         return action
-
 
 class Brain:
     def __init__(self, num_states, num_actions):
@@ -64,36 +62,29 @@ class Environment:
 
     def run(self):
         complete_episode = 0
-        is_episode_final = False
-        frames =[]
-
         for episode in range(NUM_EPISODES):
             observation = self.env.reset()
 
             for step in range(MAX_STEPS):
-                if is_episode_final is True:
-                    frames.append(self.env.render())
+                if episode % 50 == 0 or episode == NUM_EPISODES-1:
+                    self.env.render()
                 action = self.agent.get_action(observation, episode)
                 observation_next, _, done, _ = self.env.step(action)
                 if done:
                     if step < 195:
                         reward = -1
-                        complete_episode = 0
                     else:
-                        reward = 1
                         complete_episode += 1
+                        reward = 1
                 else:
                     reward = 0
                 self.agent.update_Q_function(observation, action, reward, observation_next)
                 observation = observation_next
-
                 if done:
-                    print('{0} Episode: Finished after {1} times steps'.format(episode, step+1))
+                    print('{} Episode: {} times steps  comp:{}'.format(episode, step+1,complete_episode))
                     break
 
-            if complete_episode >= 10:
-                print('10回連続成功')
-                is_episode_final = True
 
-cartpole_env = Environment()
-cartpole_env.run()
+cartpole = Environment()
+cartpole.run()
+cartpole.env.close()
